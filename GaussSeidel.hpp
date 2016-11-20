@@ -6,8 +6,9 @@
 namespace GaussSeidel {
 	using Matrix::Matrix;
 
-	inline double calculateJump (auto val) {
-		return 1 / (static_cast<double>(val) + 1);
+	template <typename T>
+	inline T calculateJump (T val) {
+		return 1 / (val + 1);
 	}
 
 	template <
