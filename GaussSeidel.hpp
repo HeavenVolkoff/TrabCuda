@@ -44,7 +44,7 @@ namespace GaussSeidel {
 				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
 		}
 
-		constexpr const T step(size_t row, size_t column) {
+		constexpr void updateElement(size_t row, size_t column) {
 			matrix(row, column) =
 				north(row, column) * matrix(row + 1, column) +
 				south(row, column) * matrix(row - 1, column) +
