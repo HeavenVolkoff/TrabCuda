@@ -103,7 +103,7 @@ namespace Matrix {
 		 */
 		constexpr Matrix() : array() {}
 
-		/** Interators **/
+		/** Iterators **/
 		const T* begin() const { return array; };
 
 		const T* end() const { return array + size; };

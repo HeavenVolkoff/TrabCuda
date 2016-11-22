@@ -25,23 +25,31 @@ namespace GaussSeidel {
 		static const B<T> b;
 
 		static constexpr const T east(size_t row, size_t column) {
-			return (2 - jumpRow * a(jumpRow * row, jumpColumn * column))
-				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
+			return (2 - jumpColumn * a(jumpColumn * column, jumpRow * row))
+				/ (4 * (1 + jumpColumn * jumpColumn / jumpRow * jumpRow));
 		}
 
 		static constexpr const T west(size_t row, size_t column) {
-			return (2 + jumpRow * a(jumpRow * row, jumpColumn * column))
-				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
+			return (2 + jumpColumn * a(jumpColumn * column, jumpRow * row))
+				/ (4 * (1 + jumpColumn * jumpColumn / jumpRow * jumpRow));
 		}
 
 		static constexpr const T south(size_t row, size_t column) {
-			return (2 + jumpColumn * b(jumpRow * row, jumpColumn * column))
-				/ (4 * (1 + jumpColumn * jumpColumn / jumpRow * jumpRow));
+			return (2 + jumpRow * b(jumpColumn * column, jumpRow * row))
+				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
 		}
 
 		static constexpr const T north(size_t row, size_t column) {
-			return (2 - jumpColumn * b(jumpRow * row, jumpColumn * column))
-				/ (4 * (1 + jumpColumn * jumpColumn / jumpRow * jumpRow));
+			return (2 - jumpRow * b(jumpColumn * column, jumpRow * row))
+				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
+		}
+
+		static constexpr const T step(size_t row, size_t column) {
+			matrix(row, column) =
+				north(row, column) * matrix(row + 1, column) +
+				south(row, column) * matrix(row - 1, column) +
+				west(row, column) * matrix(row, column - 1) +
+				east(row, column) * matrix(row, column + 1)
 		}
 
 	public:
