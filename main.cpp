@@ -6,13 +6,17 @@
 template <typename T>
 class A {
 public:
-	T operator() (T x, T y) { return 500 * x * (1 - x) * (0.5 - y); }
+	const T operator() (T x, T y) const {
+		return 500 * x * (1 - x) * (0.5 - y);
+	}
 };
 
 template <typename T>
 class B {
 public:
-	T operator() (T x, T y) { return 500 * y * (1 - y) * (x - 0.5); }
+	const T operator() (T x, T y) const {
+		return 500 * y * (1 - y) * (x - 0.5);
+	}
 };
 
 int main () {

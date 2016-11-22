@@ -7,7 +7,7 @@ namespace GaussSeidel {
 	using Matrix::Matrix;
 
 	template <typename T>
-	inline T calculateJump (T val) {
+	constexpr T calculateJump (T val) {
 		return 1 / (val + 1);
 	}
 
@@ -19,21 +19,45 @@ namespace GaussSeidel {
 	class GaussSeidel {
 	private:
 		M<columnLength, rowLength, T> const &matrix;
-		A<T> a;
-		B<T> b;
+		static constexpr T jumpRow = calculateJump<T>(columnLength);
+		static constexpr T jumpColumn = calculateJump<T>(rowLength);
+		static const A<T> a;
+		static const B<T> b;
+
+		static constexpr const T east(size_t row, size_t column) {
+			return (2 - jumpRow * a(jumpRow * row, jumpColumn * column))
+				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
+		}
+
+		static constexpr const T west(size_t row, size_t column) {
+			return (2 + jumpRow * a(jumpRow * row, jumpColumn * column))
+				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
+		}
+
+		static constexpr const T south(size_t row, size_t column) {
+			return (2 + jumpColumn * b(jumpRow * row, jumpColumn * column))
+				/ (4 * (1 + jumpColumn * jumpColumn / jumpRow * jumpRow));
+		}
+
+		static constexpr const T north(size_t row, size_t column) {
+			return (2 - jumpColumn * b(jumpRow * row, jumpColumn * column))
+				/ (4 * (1 + jumpColumn * jumpColumn / jumpRow * jumpRow));
+		}
 
 	public:
-		GaussSeidel(M<columnLength, rowLength, T> const &m)
-			: matrix(m), a(), b() {}
+		constexpr GaussSeidel(M<columnLength, rowLength, T> const &m)
+			: matrix(m) {}
 	};
 
 	template <
-		template <typename> class _A, template <typename> class _B,
-		template<size_t, size_t, typename> class _M,
-		size_t cL, size_t rL, typename _T
+		template <typename> class A, template <typename> class B,
+		template<size_t, size_t, typename> class M,
+		size_t cL, size_t rL, typename T
 	>
-	GaussSeidel<_A, _B, _M, cL, rL, _T> instantiate(_M<cL, rL, _T> const &m){
-		return GaussSeidel<_A, _B, _M, cL, rL, _T>(m);
+	constexpr GaussSeidel<A, B, M, cL, rL, T> instantiate(
+		M<cL, rL, T> const &m
+	) {
+		return GaussSeidel<A, B, M, cL, rL, T>(m);
 	}
 }
 

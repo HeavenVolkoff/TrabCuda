@@ -101,7 +101,7 @@ namespace Matrix {
 		/**
 		 * Constructor
 		 */
-		Matrix() : array() {}
+		constexpr Matrix() : array() {}
 
 		/** Interators **/
 		const T* begin() const { return array; };
