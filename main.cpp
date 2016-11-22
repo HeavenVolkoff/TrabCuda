@@ -20,13 +20,16 @@ public:
 };
 
 int main () {
-	Matrix::Matrix<10, 20, double> m;
+	Matrix::Matrix<20, 20, double> m;
 	auto gS = GaussSeidel::instantiate<A, B>(m);
 
 	m.zero();
-	m.fillColumn(0, 1);
-	m.fillColumn(m.columns - 1, 9);
-	m.fillRow(0, 2);
+	m.fillRow(0, 5);
 	m.fillRow(m.rows - 1, 5);
+	// m.fillColumn(0, 0);
+	m.fillColumn(m.columns - 1, 10);
+
+	gS.step();
+
 	std::cout << m;
 }

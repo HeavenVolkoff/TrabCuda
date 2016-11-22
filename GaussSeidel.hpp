@@ -18,7 +18,7 @@ namespace GaussSeidel {
 	>
 	class GaussSeidel {
 	private:
-		M<columnLength, rowLength, T> const &matrix;
+		M<columnLength, rowLength, T> &matrix;
 		static constexpr T jumpRow = calculateJump<T>(columnLength);
 		static constexpr T jumpColumn = calculateJump<T>(rowLength);
 		static const A<T> a;
@@ -53,8 +53,21 @@ namespace GaussSeidel {
 		}
 
 	public:
-		constexpr GaussSeidel(M<columnLength, rowLength, T> const &m)
+		constexpr GaussSeidel(M<columnLength, rowLength, T> &m)
 			: matrix(m) {}
+
+		constexpr void step(){
+			size_t rowIdx = 0;
+			size_t colIdx = 0;
+
+			for (rowIdx = 1, colIdx = 1; rowIdx < matrix.rows - 1; ++rowIdx)
+				for (; colIdx < matrix.columns - 1; colIdx += 2)
+					updateElement(rowIdx, colIdx);
+
+			for (rowIdx = 1, colIdx = 2; rowIdx < matrix.rows - 1; ++rowIdx)
+				for (; colIdx < matrix.columns - 1; colIdx += 2)
+					updateElement(rowIdx, colIdx);
+		}
 	};
 
 	template <
@@ -62,9 +75,7 @@ namespace GaussSeidel {
 		template<size_t, size_t, typename> class M,
 		size_t cL, size_t rL, typename T
 	>
-	constexpr GaussSeidel<A, B, M, cL, rL, T> instantiate(
-		M<cL, rL, T> const &m
-	) {
+	constexpr GaussSeidel<A, B, M, cL, rL, T> instantiate(M<cL, rL, T> &m) {
 		return GaussSeidel<A, B, M, cL, rL, T>(m);
 	}
 }
