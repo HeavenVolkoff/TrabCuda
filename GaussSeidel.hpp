@@ -44,12 +44,12 @@ namespace GaussSeidel {
 				/ (4 * (1 + jumpRow * jumpRow / jumpColumn * jumpColumn));
 		}
 
-		static constexpr const T step(size_t row, size_t column) {
+		constexpr const T step(size_t row, size_t column) {
 			matrix(row, column) =
 				north(row, column) * matrix(row + 1, column) +
 				south(row, column) * matrix(row - 1, column) +
 				west(row, column) * matrix(row, column - 1) +
-				east(row, column) * matrix(row, column + 1)
+				east(row, column) * matrix(row, column + 1);
 		}
 
 	public:
