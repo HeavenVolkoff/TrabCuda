@@ -1,11 +1,13 @@
 #include <string>
 #include <iostream>
-#include "./Matrix.hpp"
-#include "./GaussSeidel.hpp"
+#include "include/Matrix.hpp"
+#include "include/GaussSeidel.hpp"
 
 template <typename T>
 class A {
 public:
+	A(){}
+
 	const T operator() (T x, T y) const {
 		return 500 * x * (1 - x) * (0.5 - y);
 	}
@@ -14,6 +16,8 @@ public:
 template <typename T>
 class B {
 public:
+	B(){}
+
 	const T operator() (T x, T y) const {
 		return 500 * y * (1 - y) * (x - 0.5);
 	}

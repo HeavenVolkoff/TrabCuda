@@ -1,5 +1,6 @@
 #include <array>
 #include <string>
+#include <sstream>
 #include <cstring>
 #include <cstdlib>
 #include <cstddef>
@@ -61,11 +62,14 @@ namespace Matrix {
 		 * @return [Matrix's string representation]
 		 */
 		std::string toString() const {
-			std::string toString;
+			std::stringstream toString;
 			size_t numOfCols = columns;
 			size_t numOfRows = rows;
 			bool colContinue = false;
 			bool rowContinue = false;
+
+			toString << std::showpos << std::fixed;
+			toString.precision(5);
 
 			if (columnLength > MATRIX_TO_STRING_LIMIT) {
 				numOfRows = MATRIX_TO_STRING_LIMIT;
@@ -78,19 +82,19 @@ namespace Matrix {
 			}
 
 			for (size_t rowIndex = 0; rowIndex < numOfRows; ++rowIndex) {
-				toString += '[' + std::to_string(at(rowIndex, 0));
+				toString << '[' << at(rowIndex, 0);
 
 				for (size_t colIndex = 1; colIndex < numOfCols; ++colIndex) {
-					toString += ", " + std::to_string(at(rowIndex, colIndex));
+					toString << ", " << at(rowIndex, colIndex);
 				}
 
-				if (colContinue) { toString += ", . . ."; }
-				toString += "]\n";
+				if (colContinue) { toString << ", . . ."; }
+				toString << "]\n";
 			}
 
-			if (rowContinue) { toString += ".\n.\n.\n"; }
+			if (rowContinue) { toString << ".\n.\n.\n"; }
 
-			return toString;
+			return toString.str();
 		}
 
 	public:
@@ -274,9 +278,18 @@ namespace Matrix {
 		operator std::string() { return toString(); }
 	};
 
-/**
- * Operator Overload - <<
- */
+	template<size_t columnLength, size_t rowLength, typename T>
+	const size_t Matrix<columnLength, rowLength, T>::size;
+
+	template<size_t columnLength, size_t rowLength, typename T>
+	const size_t Matrix<columnLength, rowLength, T>::rows;
+
+	template<size_t columnLength, size_t rowLength, typename T>
+	const size_t Matrix<columnLength, rowLength, T>::columns;
+
+	/**
+	 * Operator Overload - <<
+	 */
 	template<size_t M, size_t N, typename T>
 	std::ostream &operator<<(std::ostream &stream, const Matrix<M, N, T> &m) {
 		return stream << static_cast<std::string const &>(m);

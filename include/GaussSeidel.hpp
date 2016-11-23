@@ -19,6 +19,7 @@ namespace GaussSeidel {
 	class GaussSeidel {
 	private:
 		M<columnLength, rowLength, T> &matrix;
+
 		static constexpr T jumpRow = calculateJump<T>(columnLength);
 		static constexpr T jumpColumn = calculateJump<T>(rowLength);
 		static const A<T> a;
@@ -60,11 +61,11 @@ namespace GaussSeidel {
 			size_t rowIdx = 0;
 			size_t colIdx = 0;
 
-			for (rowIdx = 1, colIdx = 1; rowIdx < matrix.rows - 1; ++rowIdx)
+			for (rowIdx = 1, colIdx = 1; rowIdx < matrix.rows-1; ++rowIdx, colIdx = 1)
 				for (; colIdx < matrix.columns - 1; colIdx += 2)
 					updateElement(rowIdx, colIdx);
 
-			for (rowIdx = 1, colIdx = 2; rowIdx < matrix.rows - 1; ++rowIdx)
+			for (rowIdx = 1, colIdx = 2; rowIdx < matrix.rows -1; ++rowIdx, colIdx = 2)
 				for (; colIdx < matrix.columns - 1; colIdx += 2)
 					updateElement(rowIdx, colIdx);
 		}
@@ -78,6 +79,34 @@ namespace GaussSeidel {
 	constexpr GaussSeidel<A, B, M, cL, rL, T> instantiate(M<cL, rL, T> &m) {
 		return GaussSeidel<A, B, M, cL, rL, T>(m);
 	}
+
+	template <
+			template <typename> class A, template <typename> class B,
+			template<size_t, size_t, typename> class M,
+			size_t cL, size_t rL, typename T
+	>
+	constexpr T GaussSeidel<A, B, M, cL, rL, T>::jumpRow;
+
+	template <
+			template <typename> class A, template <typename> class B,
+			template<size_t, size_t, typename> class M,
+			size_t cL, size_t rL, typename T
+	>
+	constexpr T GaussSeidel<A, B, M, cL, rL, T>::jumpColumn;
+
+	template <
+			template <typename> class A, template <typename> class B,
+			template<size_t, size_t, typename> class M,
+			size_t cL, size_t rL, typename T
+	>
+	const A<T> GaussSeidel<A, B, M, cL, rL, T>::a;
+
+	template <
+			template <typename> class A, template <typename> class B,
+			template<size_t, size_t, typename> class M,
+			size_t cL, size_t rL, typename T
+	>
+	const B<T> GaussSeidel<A, B, M, cL, rL, T>::b;
 }
 
 #endif
