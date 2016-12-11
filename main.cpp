@@ -24,8 +24,8 @@ public:
 };
 
 int main () {
-	Matrix::Matrix<20, 20, double> m;
-	auto gS = GaussSeidel::instantiate<A, B>(m);
+	Matrix::Matrix<double> m(50, 50);
+	auto gS = GaussSeidel::instantiate<B, A>(m);
 
 	m.zero();
 	m.fillRow(0, 5);
@@ -33,7 +33,7 @@ int main () {
 	// m.fillColumn(0, 0);
 	m.fillColumn(m.columns - 1, 10);
 
-	gS.step();
+	for (size_t i = 0; i < 50000; ++i) gS.step();
 
 	std::cout << m;
 }

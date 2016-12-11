@@ -9,7 +9,7 @@
 
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
-#define MATRIX_TO_STRING_LIMIT 20
+#define MATRIX_TO_STRING_LIMIT 200
 
 namespace Matrix {
 	/**
@@ -17,11 +17,11 @@ namespace Matrix {
 	 * This code was heavily influenced by:
 	 * https://raw.githubusercontent.com/VMML/vmmlib/master/vmmlib/matrix.hpp
 	 */
-	template<size_t columnLength, size_t rowLength, typename T = double>
+	template<typename T = double>
 	class Matrix {
 	private:
 		/** Members **/
-		T array[columnLength * rowLength];
+		T* const array;
 
 		/** Methods */
 		/**
@@ -29,11 +29,11 @@ namespace Matrix {
 		 * @param  colIndex [Which column]
 		 * @return       [Column's values]
 		 */
-		std::array<T, columnLength> getColumnAtIndex(size_t colIndex) const {
+		T* getColumnAtIndex(size_t colIndex) const {
 			if (colIndex >= columns)
 				throw std::out_of_range("Index out of bounds");
 
-			std::array<T, columnLength> column;
+			T* column = new T[columnLength];
 
 			for (size_t rowCounter = 0; rowCounter < rows; ++rowCounter)
 				column[rowCounter] = at(rowCounter, colIndex);
@@ -46,11 +46,11 @@ namespace Matrix {
 		 * @param  index [Which row]
 		 * @return       [Row's values]
 		 */
-		std::array<T, rowLength> getRowAtIndex(size_t index) const {
+		T* getRowAtIndex(size_t index) const {
 			if (index >= columnLength)
 				throw std::out_of_range("Index out of bounds");
 
-			std::array<T, columnLength> row;
+			T* row = new T[rowLength];
 
 			std::memcpy(row, &array[rowLength * index], rowLength * sizeof(T));
 
@@ -98,51 +98,28 @@ namespace Matrix {
 		}
 
 	public:
-		static const size_t size = columnLength * rowLength;
-		static const size_t rows = columnLength;
-		static const size_t columns = rowLength;
+		size_t const size, rows, columnLength, rowLength, columns;
 
 		/**
 		 * Constructor
 		 */
-		constexpr Matrix() : array() {}
+		constexpr Matrix(size_t columnLength, size_t rowLength)
+			: rows(columnLength), columns(rowLength),
+			  size(columnLength * rowLength), array(new T[columnLength * rowLength]),
+			  columnLength(columnLength), rowLength(rowLength){}
 
 		/** Iterators **/
-		const T* begin() const { return array; };
+		T* const begin() const { return array; };
 
-		const T* end() const { return array + size; };
+		T* const end() const { return array + size; };
 
-		T* begin() {
-			return const_cast<T*>(
-					const_cast<Matrix<rows, columns, T> const &>(*this).begin()
-			);
+		std::reverse_iterator<T* const> rbegin() const {
+			return std::reverse_iterator<T* const>(array + size - 1);
 		};
 
-		T* end() {
-			return const_cast<T*>(
-					const_cast<Matrix<rows, columns, T> const &>(*this).end()
-			);
+		std::reverse_iterator<T* const> rend() const {
+			return std::reverse_iterator<T* const>(array - 1);
 		};
-
-		std::reverse_iterator<const T*> rbegin() const {
-			return array + size - 1;
-		};
-
-		std::reverse_iterator<const T*> rend() const {
-			return array - 1;
-		};
-
-		std::reverse_iterator<T*> rbegin() {
-			return const_cast<std::reverse_iterator<T*>>(
-					const_cast<Matrix<rows, columns, T> const &>(*this).rbegin()
-			);
-		}
-
-		std::reverse_iterator<T*> rend() {
-			return const_cast<std::reverse_iterator<T*>>(
-					const_cast<Matrix<rows, columns, T> const &>(*this).rend()
-			);
-		}
 
 		/** Getters **/
 		/**
@@ -151,7 +128,7 @@ namespace Matrix {
 		 * @param  colIndex [The matrix column position]
 		 * @return          [Value at [Row][Column] position]
 		 */
-		const T &at(size_t rowIndex, size_t colIndex) const {
+		T const &at(size_t rowIndex, size_t colIndex) const {
 			if (rowIndex >= rows || colIndex >= columns)
 				throw std::out_of_range("Index out of bounds");
 
@@ -160,13 +137,13 @@ namespace Matrix {
 
 		T &at(size_t rowIndex, size_t colIndex) {
 			return const_cast<T &>(
-					const_cast<Matrix<rows, columns, T> const &>(*this)
+					const_cast<Matrix<T> const &>(*this)
 							.at(rowIndex, colIndex)
 			);
 		}
 
 		// Operator overload - Function call
-		const T &operator()(size_t rowIndex, size_t colIndex) const {
+		T const &operator()(size_t rowIndex, size_t colIndex) const {
 			return at(rowIndex, colIndex);
 		}
 
@@ -174,19 +151,19 @@ namespace Matrix {
 			return at(rowIndex, colIndex);
 		}
 
-		const std::array<T, columnLength> getColumn(size_t index) const {
+		T* const getColumn(size_t index) const {
 			return getColumnAtIndex(index);
 		}
 
-		std::array<T, columnLength> getColumn(size_t index) {
+		T* getColumn(size_t index) {
 			return getColumnAtIndex(index);
 		}
 
-		const std::array<T, rowLength> getRow(size_t index) const {
+		T* const getRow(size_t index) const {
 			return getRowAtIndex(index);
 		}
 
-		std::array<T, rowLength> getRow(size_t index) {
+		T* getRow(size_t index) {
 			return getRowAtIndex(index);
 		}
 
@@ -195,12 +172,12 @@ namespace Matrix {
 		 * Fill matrix with single value
 		 * @param fillValue [Value used to fill matrix]
 		 * @param rowIndex  [Start row]
-		 * @param numOfRows [Number of rows to be filler]
+		 * @param numOfRows [Number of rows to be filled]
 		 * @param colIndex  [Start columns]
-		 * @param numOfCols [Number of columns to be filler]
+		 * @param numOfCols [Number of columns to be filled]
 		 */
-		void fill(T fillValue, size_t rowIndex = 0, size_t numOfRows = rows,
-		          size_t colIndex = 0, size_t numOfCols = columns
+		void fill(T fillValue, size_t rowIndex, size_t numOfRows,
+		          size_t colIndex, size_t numOfCols
 		) {
 			if (rowIndex < 0 || rowIndex >= rows ||
 			    colIndex < 0 || colIndex >= columns ||
@@ -214,6 +191,16 @@ namespace Matrix {
 		}
 
 		/**
+		 * Overload of fill
+		 * @param fillValue [Value used to fill matrix]
+		 * @param rowIndex [Start row]
+		 * @param colIndex [Start columns]
+		 */
+		void fill (T fillValue, size_t rowIndex = 0, size_t colIndex = 0) {
+			return fill(fillValue, rowIndex, rows, colIndex, columns);
+		}
+
+		/**
 		 * Zero-fill matrix
 		 */
 		void zero() { fill(static_cast<T>(0.0)); }
@@ -223,11 +210,13 @@ namespace Matrix {
 		 * @param colIndex  [Which column]
 		 * @param column [Column's new values]
 		 */
+		template<size_t columnLength>
 		void setColumn(size_t colIndex, const std::array<T, columnLength>& column) {
 			if (colIndex >= columns)
 				throw std::out_of_range("Index out of bounds");
 
-			for (size_t rowCounter = 0; rowCounter < rows; ++rowCounter)
+			size_t limit = rows < columnLength ? rows : columnLength;
+			for (size_t rowCounter = 0; rowCounter < limit; ++rowCounter)
 				at(rowCounter, colIndex) = column[rowCounter];
 		}
 
@@ -245,11 +234,16 @@ namespace Matrix {
 		 * @param index  [Which row]
 		 * @param column [Row's new values]
 		 */
+		template<size_t rowLength>
 		void setRow(size_t index, const std::array<T, rowLength>& row) {
 			if (index >= rows)
 				throw std::out_of_range("Index out of bounds");
 
-			std::memcpy(array + rowLength * index, row, rowLength * sizeof(T));
+			size_t limit = rows < columnLength ? rows : columnLength;
+			std::memcpy(array + (this->rowLength * index),
+			            static_cast<const void*>(row),
+			            limit * sizeof(T)
+			);
 		}
 
 		/**
@@ -258,7 +252,7 @@ namespace Matrix {
 		 * @param fillValue [Value to fill row]
 		 */
 		void fillRow(size_t index, T fillValue) {
-			fill(fillValue, index, 1);
+			fill(fillValue, index, 1, 0, rowLength);
 		}
 
 		/**
@@ -278,20 +272,11 @@ namespace Matrix {
 		operator std::string() { return toString(); }
 	};
 
-	template<size_t columnLength, size_t rowLength, typename T>
-	const size_t Matrix<columnLength, rowLength, T>::size;
-
-	template<size_t columnLength, size_t rowLength, typename T>
-	const size_t Matrix<columnLength, rowLength, T>::rows;
-
-	template<size_t columnLength, size_t rowLength, typename T>
-	const size_t Matrix<columnLength, rowLength, T>::columns;
-
 	/**
 	 * Operator Overload - <<
 	 */
-	template<size_t M, size_t N, typename T>
-	std::ostream &operator<<(std::ostream &stream, const Matrix<M, N, T> &m) {
+	template<typename T>
+	std::ostream &operator<<(std::ostream &stream, const Matrix<T> &m) {
 		return stream << static_cast<std::string const &>(m);
 	}
 }
