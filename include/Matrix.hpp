@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
+#include "./cudaUtils.h"
 
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
@@ -108,6 +109,12 @@ namespace Matrix {
 			  size(columnLength * rowLength), array(new T[columnLength * rowLength]),
 			  columnLength(columnLength), rowLength(rowLength){}
 
+		CUDA_DEVICE constexpr Matrix(
+				T* array, size_t columnLength, size_t rowLength
+		) : rows(columnLength), columns(rowLength),
+		    size(columnLength * rowLength), array(array),
+		    columnLength(columnLength), rowLength(rowLength){}
+
 		/** Iterators **/
 		T* const begin() const { return array; };
 
@@ -128,14 +135,14 @@ namespace Matrix {
 		 * @param  colIndex [The matrix column position]
 		 * @return          [Value at [Row][Column] position]
 		 */
-		T const &at(size_t rowIndex, size_t colIndex) const {
+		CUDA_DEVICE T const &at(size_t rowIndex, size_t colIndex) const {
 			if (rowIndex >= rows || colIndex >= columns)
 				throw std::out_of_range("Index out of bounds");
 
 			return array[rowIndex * rowLength + colIndex];
 		}
 
-		T &at(size_t rowIndex, size_t colIndex) {
+		CUDA_DEVICE T &at(size_t rowIndex, size_t colIndex) {
 			return const_cast<T &>(
 					const_cast<Matrix<T> const &>(*this)
 							.at(rowIndex, colIndex)
@@ -143,11 +150,11 @@ namespace Matrix {
 		}
 
 		// Operator overload - Function call
-		T const &operator()(size_t rowIndex, size_t colIndex) const {
+		CUDA_DEVICE T const &operator()(size_t rowIndex, size_t colIndex) const {
 			return at(rowIndex, colIndex);
 		}
 
-		T &operator()(size_t rowIndex, size_t colIndex) {
+		CUDA_DEVICE T &operator()(size_t rowIndex, size_t colIndex) {
 			return at(rowIndex, colIndex);
 		}
 
@@ -176,7 +183,7 @@ namespace Matrix {
 		 * @param colIndex  [Start columns]
 		 * @param numOfCols [Number of columns to be filled]
 		 */
-		void fill(T fillValue, size_t rowIndex, size_t numOfRows,
+		CUDA_DEVICE void fill(T fillValue, size_t rowIndex, size_t numOfRows,
 		          size_t colIndex, size_t numOfCols
 		) {
 			if (rowIndex < 0 || rowIndex >= rows ||
@@ -196,14 +203,16 @@ namespace Matrix {
 		 * @param rowIndex [Start row]
 		 * @param colIndex [Start columns]
 		 */
-		void fill (T fillValue, size_t rowIndex = 0, size_t colIndex = 0) {
+		CUDA_DEVICE void fill (
+				T fillValue, size_t rowIndex = 0, size_t colIndex = 0
+		) {
 			return fill(fillValue, rowIndex, rows, colIndex, columns);
 		}
 
 		/**
 		 * Zero-fill matrix
 		 */
-		void zero() { fill(static_cast<T>(0.0)); }
+		CUDA_DEVICE void zero() { fill(static_cast<T>(0.0)); }
 
 		/**
 		 * Set the value of a matrix's column
@@ -225,7 +234,7 @@ namespace Matrix {
 		 * @param index     [Which column]
 		 * @param fillValue [Value to fill column]
 		 */
-		void fillColumn(size_t index, T fillValue) {
+		CUDA_DEVICE void fillColumn(size_t index, T fillValue) {
 			fill(fillValue, 0, columnLength, index, 1);
 		}
 
@@ -251,7 +260,7 @@ namespace Matrix {
 		 * @param index     [Which row]
 		 * @param fillValue [Value to fill row]
 		 */
-		void fillRow(size_t index, T fillValue) {
+		CUDA_DEVICE void fillRow(size_t index, T fillValue) {
 			fill(fillValue, index, 1, 0, rowLength);
 		}
 
@@ -259,9 +268,9 @@ namespace Matrix {
 		 * Convert operator overload
 		 * Declare how a Matrix should be interpreted when converted to T*
 		 */
-		operator const T *() const { return array; }
+		CUDA_DEVICE operator const T *() const { return array; }
 
-		operator T *() { return array; }
+		CUDA_DEVICE operator T *() { return array; }
 
 		/**
 		 * Convert operator overload

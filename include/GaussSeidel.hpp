@@ -28,9 +28,18 @@ namespace GaussSeidel {
 		const T jumpRow;
 		const T jumpColumn;
 
-//		constexpr const T oij (size_t row, size_t column) {
-//			return 2 * (sqrt(east(row, column) * west(row, column)) * cos());
-//		}
+		constexpr const T w (size_t row, size_t column) {
+			const T temp = oij(row, column);
+			return 2 / (1 + sqrt(1 - (temp * temp)));
+		}
+
+		constexpr const T oij (size_t row, size_t column) {
+			return 2 * (
+					(sqrt(east(row, column) * west(row, column)) * cos(jumpColumn * M_PI))
+			       +
+					(sqrt(north(row, column) * south(row, column)) * cos(jumpRow * M_PI))
+			);
+		}
 
 		constexpr const T east(size_t row, size_t column) {
 			return (2 - (jumpColumn * a(jumpColumn * column, jumpRow * row)))
@@ -52,11 +61,19 @@ namespace GaussSeidel {
 			       / (4 * (1 + ((jumpRow * jumpRow) / (jumpColumn * jumpColumn))));
 		}
 
-		constexpr void updateElement(size_t row, size_t column) {
-			matrix(row, column) = (north(row, column) * matrix(row - 1, column)) +
-					(south(row, column) * matrix(row + 1, column)) +
-					(west(row, column) * matrix(row, column - 1)) +
-					(east(row, column) * matrix(row, column + 1));
+	public:
+		CUDA_DEVICE constexpr GaussSeidel(M<T> &m)
+				: matrix(m), jumpRow(calculateJump<T>(m.rowLength)),
+				  jumpColumn(calculateJump<T>(m.columnLength)) {}
+
+		CUDA_DEVICE constexpr void updateElement(size_t row, size_t column) {
+			T localW = w(row, column);
+
+			matrix(row, column) = (1 - localW) * matrix(row, column) +
+			                      localW * ((north(row, column) * matrix(row - 1, column)) +
+			                                (south(row, column) * matrix(row + 1, column)) +
+			                                (west(row, column) * matrix(row, column - 1)) +
+			                                (east(row, column) * matrix(row, column + 1)));
 
 //			std::cout << std::endl << "Row: " << row << std::endl << "Column: "
 //			          << column << std::endl << "JumpRow: " << jumpRow << std::endl
@@ -71,11 +88,6 @@ namespace GaussSeidel {
 //			          << east(row, column) << " * " << matrix(row, column + 1)
 //			          << std::endl << matrix << std::endl;
 		}
-
-	public:
-		constexpr GaussSeidel(M<T> &m)
-				: matrix(m), jumpRow(calculateJump<T>(m.rowLength)),
-				  jumpColumn(calculateJump<T>(m.columnLength)) {}
 
 		constexpr void step() {
 			size_t rowIdx = 0, colIdx = 0, rowStart = 0;
@@ -103,15 +115,6 @@ namespace GaussSeidel {
 //					updateElement(rowIdx, colIdx);
 		}
 	};
-
-	template<
-			template<typename> class A,
-			template<typename> class B,
-			template<typename> class M, typename T
-	>
-	constexpr GaussSeidel<A, B, M, T> instantiate(M<T> &m) {
-		return GaussSeidel<A, B, M, T>(m);
-	}
 
 	template<
 			template<typename> class A,

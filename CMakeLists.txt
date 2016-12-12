@@ -12,6 +12,6 @@ set(HEADER_FILES
         ${INCLUDE_DIR}/Matrix.hpp)
 
 set(SOURCE_FILES
-        main.cpp)
+        main.cpp include/cudaUtils.h)
 
 add_executable(CUDA ${SOURCE_FILES} ${HEADER_FILES})
