@@ -1,5 +1,7 @@
-#include "./Matrix.hpp"
+#include <ctgmath>
 #include <iostream>
+
+#include "./Matrix.hpp"
 
 #ifndef GAUSS_SEIDEL_HPP
 #define GAUSS_SEIDEL_HPP
@@ -26,6 +28,10 @@ namespace GaussSeidel {
 		const T jumpRow;
 		const T jumpColumn;
 
+//		constexpr const T oij (size_t row, size_t column) {
+//			return 2 * (sqrt(east(row, column) * west(row, column)) * cos());
+//		}
+
 		constexpr const T east(size_t row, size_t column) {
 			return (2 - (jumpColumn * a(jumpColumn * column, jumpRow * row)))
 			       / (4 * (1 + ((jumpColumn * jumpColumn) / (jumpRow * jumpRow))));
@@ -47,11 +53,10 @@ namespace GaussSeidel {
 		}
 
 		constexpr void updateElement(size_t row, size_t column) {
-			matrix(row, column) =
-					(north(row, column) * matrix(row - 1, column)) +
-							(south(row, column) * matrix(row + 1, column)) +
-							(west(row, column) * matrix(row, column - 1)) +
-							(east(row, column) * matrix(row, column + 1));
+			matrix(row, column) = (north(row, column) * matrix(row - 1, column)) +
+					(south(row, column) * matrix(row + 1, column)) +
+					(west(row, column) * matrix(row, column - 1)) +
+					(east(row, column) * matrix(row, column + 1));
 
 //			std::cout << std::endl << "Row: " << row << std::endl << "Column: "
 //			          << column << std::endl << "JumpRow: " << jumpRow << std::endl
@@ -75,19 +80,27 @@ namespace GaussSeidel {
 		constexpr void step() {
 			size_t rowIdx = 0, colIdx = 0, rowStart = 0;
 
-//			for (colIdx = 1, rowStart = 2; colIdx < (matrix.columns - 1);
-//			     rowStart = (rowStart % 2) + 1, ++colIdx)
-//				for (rowIdx = rowStart; rowIdx < (matrix.rows - 1); rowIdx += 2)
-//					updateElement(rowIdx, colIdx);
+			for (colIdx = 1, rowStart = 2; colIdx < (matrix.columns - 1);
+			     rowStart = (rowStart % 2) + 1, ++colIdx)
+				for (rowIdx = rowStart; rowIdx < (matrix.rows - 1); rowIdx += 2)
+					updateElement(rowIdx, colIdx);
+
+			for (colIdx = 1, rowStart = 1; colIdx < (matrix.columns - 1);
+			     rowStart = (rowStart % 2) + 1, ++colIdx)
+				for (rowIdx = rowStart; rowIdx < (matrix.rows - 1); rowIdx += 2)
+					updateElement(rowIdx, colIdx);
 //
-//			for (colIdx = 1, rowStart = 1; colIdx < (matrix.columns - 1);
-//			     rowStart = (rowStart % 2) + 1, ++colIdx)
-//				for (rowIdx = rowStart; rowIdx < (matrix.rows - 1); rowIdx += 2)
+//			for (rowIdx = 1; rowIdx < (matrix.rows - 1); ++rowIdx)
+//				for (colIdx = 1; colIdx < (matrix.columns - 1); ++colIdx)
 //					updateElement(rowIdx, colIdx);
 
-			for (rowIdx = 1; rowIdx < (matrix.rows - 1); ++rowIdx)
-				for (colIdx = 1; colIdx < (matrix.columns - 1); ++colIdx)
-					updateElement(rowIdx, colIdx);
+//			for (rowIdx = 1, colIdx = 1; rowIdx < matrix.rows-1; ++rowIdx, colIdx = 1)
+//				for (; colIdx < matrix.columns - 1; colIdx += 2)
+//					updateElement(rowIdx, colIdx);
+//
+//			for (rowIdx = 1, colIdx = 2; rowIdx < matrix.rows -1; ++rowIdx, colIdx = 2)
+//				for (; colIdx < matrix.columns - 1; colIdx += 2)
+//					updateElement(rowIdx, colIdx);
 		}
 	};
 
