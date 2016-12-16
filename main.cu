@@ -2,7 +2,7 @@
 #include <ctime>
 
 #include "include/Matrix.hpp"
-#include "include/cudaUtils.h"
+#include "include/cudaUtils.hpp"
 #include "include/GaussSeidel.hpp"
 
 #define THREAD_BLOCK_SIZE 16

@@ -1,7 +1,7 @@
 #include <ctgmath>
 
 #include "./Matrix.hpp"
-#include "./cudaUtils.h"
+#include "./cudaUtils.hpp"
 
 #ifndef GAUSS_SEIDEL_HPP
 #define GAUSS_SEIDEL_HPP

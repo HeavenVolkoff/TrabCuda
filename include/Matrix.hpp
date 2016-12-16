@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include "./cudaUtils.h"
+#include "./cudaUtils.hpp"
 
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
