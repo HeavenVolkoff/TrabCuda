@@ -9,7 +9,6 @@
 
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
-#define MATRIX_TO_STRING_LIMIT 256
 
 namespace Matrix {
 	/**
@@ -29,36 +28,18 @@ namespace Matrix {
 		 */
 		CUDA_HOST std::string toString() const {
 			std::stringstream toString;
-			size_t numOfCols = columns;
-			size_t numOfRows = rows;
-			bool colContinue = false;
-			bool rowContinue = false;
 
 			toString << std::showpos << std::fixed;
 			toString.precision(5);
 
-			if (columnLength > MATRIX_TO_STRING_LIMIT) {
-				numOfRows = MATRIX_TO_STRING_LIMIT;
-				rowContinue = true;
-			}
-
-			if (rowLength > MATRIX_TO_STRING_LIMIT) {
-				numOfCols = MATRIX_TO_STRING_LIMIT;
-				colContinue = true;
-			}
-
-			for (size_t rowIndex = 0; rowIndex < numOfRows; ++rowIndex) {
+			for (size_t rowIndex = 0; rowIndex < rows; ++rowIndex) {
 				toString << '[' << at(rowIndex, 0);
 
-				for (size_t colIndex = 1; colIndex < numOfCols; ++colIndex) {
+				for (size_t colIndex = 1; colIndex < columns; ++colIndex) {
 					toString << ", " << at(rowIndex, colIndex);
 				}
-
-				if (colContinue) { toString << ", . . ."; }
 				toString << "]\n";
 			}
-
-			if (rowContinue) { toString << ".\n.\n.\n"; }
 
 			return toString.str();
 		}

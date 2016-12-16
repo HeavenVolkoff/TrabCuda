@@ -1,5 +1,5 @@
 #include <new>
-#include <string>
+#include <ctime>
 
 #include "include/Matrix.hpp"
 #include "include/cudaUtils.h"
@@ -69,9 +69,9 @@ KERNEL void blueDot (gaussType *gS, size_t rowLimit, size_t columnLimit) {
 int main (int argc, char** argv) {
 	gaussType *deviceGS;
 	matrixType *deviceMatrix;
-	dataType *hostMatrixData;
 	dataType *deviceMatrixData;
 	size_t columns, rows, laps, north, south, west, east, matrixDataSize;
+	char print;
 
 	if (argc == 8) {
 		rows = atoi(argv[0]);
@@ -110,8 +110,11 @@ int main (int argc, char** argv) {
 		(columns + threadNum.x - 3) / threadNum.x,
 		(((rows - 1) / 2) + threadNum.y - 1) / threadNum.y
 	);
-	std::cout << "Block Thread Size: " << threadNum.x << " X " << threadNum.y << std::endl << "Block Size: " << blockNum.x << " X " << blockNum.y << std::endl;
+	std::cout << "Block Thread Size: " << threadNum.x << " X " << threadNum.y <<
+				std::endl << "Block Size: " << blockNum.x << " X " <<
+				blockNum.y << std::endl;
 
+	clock_t time = clock();
 	while (laps > 0) {
 		redDot<<<blockNum, threadNum>>>(deviceGS, rows - 1, columns - 1);
 		CUDA_ERROR_CHECK(cudaPeekAtLastError());
@@ -119,15 +122,26 @@ int main (int argc, char** argv) {
 		CUDA_ERROR_CHECK(cudaPeekAtLastError());
 		--laps;
 	}
-
 	CUDA_ERROR_CHECK(cudaDeviceSynchronize());
+	time = (clock() - time);
 
-	hostMatrixData = (dataType*) malloc(matrixDataSize);
-	CUDA_ERROR_CHECK(cudaMemcpy(
-		hostMatrixData, deviceMatrixData, matrixDataSize, cudaMemcpyDeviceToHost
-	));
-	matrixType hostMatrix(rows, columns, hostMatrixData);
-	std::cout << hostMatrix;
+	std::cout << "Kernel time: " << time << " cycles" << std::endl;
+	std::cout << "Print Matrix (y/N): ";
+    std::cin >> print;
+
+    if (print == 'y') {
+    	dataType* hostMatrixData = (dataType*) malloc(matrixDataSize);
+		CUDA_ERROR_CHECK(cudaMemcpy(hostMatrixData, deviceMatrixData,
+			matrixDataSize, cudaMemcpyDeviceToHost
+		));
+		matrixType hostMatrix(rows, columns, hostMatrixData);
+		std::cout << hostMatrix;
+		free(hostMatrixData);
+    }
+
+    CUDA_ERROR_CHECK(cudaFree(deviceMatrixData));
+    CUDA_ERROR_CHECK(cudaFree(deviceGS));
+    CUDA_ERROR_CHECK(cudaFree(deviceMatrix));
 
 	return 0;
 }
