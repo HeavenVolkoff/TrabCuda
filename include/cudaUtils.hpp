@@ -1,7 +1,7 @@
 #include <iostream>
 
-#ifndef CUDA_UTILS_H
-	#define CUDA_UTILS_H
+#ifndef CUDA_UTILS_HPP
+	#define CUDA_UTILS_HPP
 
 	#ifdef __NVCC__
 
@@ -31,4 +31,4 @@
 
 	#endif
 
-#endif //CUDA_UTILS_H
+#endif //CUDA_UTILS_HPP
