@@ -1,35 +1,16 @@
 #include <new>
-#include <ctime>
+#include <chrono>
 
 #include "include/Matrix.hpp"
+#include "include/equation.hpp" 
 #include "include/cudaUtils.hpp"
 #include "include/GaussSeidel.hpp"
 
 #define THREAD_BLOCK_SIZE 16
 
-template <typename T>
-class A {
-public:
-    CUDA_DEVICE A(){}
-
-    CUDA_DEVICE const T operator() (T x, T y) const {
-        return 500.0f * x * (1.0f - x) * (0.5f - y);
-    }
-};
-
-template <typename T>
-class B {
-public:
-    CUDA_DEVICE B(){}
-
-    CUDA_DEVICE const T operator() (T x, T y) const {
-        return 500.0f * y * (1.0f - y) * (x - 0.5f);
-    }
-};
-
 typedef float dataType;
 typedef Matrix::Matrix<dataType> matrixType;
-typedef GaussSeidel::GaussSeidel<A, B, Matrix::Matrix, dataType> gaussType;
+typedef GaussSeidel::GaussSeidel<equation::A, equation::B, Matrix::Matrix, dataType> gaussType;
 
 template <typename T>
 CUDA_DEVICE inline void matrixSetup (
@@ -114,7 +95,7 @@ int main (int argc, char** argv) {
 				std::endl << "Block Size: " << blockNum.x << " X " <<
 				blockNum.y << std::endl;
 
-	clock_t time = clock();
+	auto start = std::chrono::steady_clock::now();
 	while (laps > 0) {
 		redDot<<<blockNum, threadNum>>>(deviceGS, rows - 1, columns - 1);
 		CUDA_ERROR_CHECK(cudaPeekAtLastError());
@@ -123,9 +104,9 @@ int main (int argc, char** argv) {
 		--laps;
 	}
 	CUDA_ERROR_CHECK(cudaDeviceSynchronize());
-	time = (clock() - time);
+	std::chrono::duration<double, std::milli> duration = std::chrono::steady_clock::now() - start;
 
-	std::cout << "Kernel time: " << time << " cycles" << std::endl;
+	std::cout << "Kernel time: " << duration.count() << " ms" << std::endl;
 	std::cout << "Print Matrix (y/N): ";
     std::cin >> print;
 

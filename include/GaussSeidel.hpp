@@ -69,11 +69,11 @@ namespace GaussSeidel {
 		CUDA_DEVICE void updateElement(size_t row, size_t column) {
 			T localW = w(row, column);
 			matrix(row, column) = ((1.0f - localW) * matrix(row, column)) +
-														(localW * (
-															(north(row, column) * matrix(row + 1, column)) +
-			                        (south(row, column) * matrix(row - 1, column)) +
-			                        (west(row, column) * matrix(row, column - 1)) +
-			                        (east(row, column) * matrix(row, column + 1))
+									(localW * (
+										(north(row, column) * matrix(row + 1, column)) +
+			                        	(south(row, column) * matrix(row - 1, column)) +
+			                        	(west(row, column) * matrix(row, column - 1)) +
+			                        	(east(row, column) * matrix(row, column + 1))
 			                      ));
 		}
 	};
